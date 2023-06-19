@@ -1,70 +1,88 @@
-# Getting Started with Create React App
+## Apollo Client with ReactJS
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Apollo Client**  
+Apollo Client는 GraphQL을 사용하여 로컬 및 원격 데이터를 모두 관리할 수 있는 JavaScript용 상태 관리 라이브러리입니다. UI를 자동으로 업데이트하면서 애플리케이션 데이터를 가져오고, 캐시하고, 수정하는 데 사용합니다.  
+https://www.apollographql.com/docs/react
 
-## Available Scripts
+특징 !
 
-In the project directory, you can run:
+1. 데이터 fetching
+2. 우수한 개발 경험 (TypeScript, devtools 등 유용한 도구 사용 가능)
+3. 모던 React용으로 설계 (훅과 같은 최신 React 기능을 활용 가능)
+4. 범용 호환 (모든 빌드 셋업 및 GraphQL API를 사용)
 
-### `npm start`
+https://www.apollographql.com/docs/react/#features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**GraphQL Server Connect**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+ApolloClient 초기화
 
-### `npm test`
+```
+import { ApolloClient, InMemoryCache } from "@apollo/client";
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+// apllo client 생성 및 백엔드와 연동
+// 실행중인 graphQL server를 가지고 있어야함.
+const client = new ApolloClient({
+	uri: "http://localhost:4000",
+	cache: new InMemoryCache(),
+});
+```
 
-### `npm run build`
+https://www.apollographql.com/docs/react/get-started#2-initialize-apolloclient
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**ApolloProvider**  
+provider는 기본적으로 앱 안의 모든 리액트가 client에 접근할 수 있도록 한다.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+	<React.StrictMode>
+		<ApolloProvider  client={client}>
+			<App  />
+		</ApolloProvider>
+	</React.StrictMode>
+);
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**useApolloClient**
 
-### `npm run eject`
+```
+import { useApolloClient } from '@apollo/client';
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+function Component() {
+	// 애플리케이션에서 사용 중인 ApolloClient 인스턴스
+	const client = useApolloClient();
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+	// 일반적인 react useEffect hook 이용시 아래와 같이 사용
+	useEffect(() => {
+		client.query({
+			query: gql` {
+				allMovies { id title year summary }
+			}`, })
+		 .then((result) => setMovies(result.data.allMovies)); },
+  [client]);
+}
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+https://www.apollographql.com/docs/react/api/react/hooks/#useapolloclient
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+**useQuery**
+useQuery 훅을 사용하여 React에서 GraphQL 데이터를 가져오고 그 결과를 UI에 연결할 수 있습니다. useQuery 훅은 Apollo 애플리케이션에서 쿼리를 실행하기 위한 기본 API입니다. 컴포넌트가 렌더링될 때 useQuery는 UI를 렌더링하는 데 사용할 수 있는 loading, error, data 속성이 포함된 Apollo Client의 객체를 반환합니다.
 
-## Learn More
+```
+const ALL_DATA = gql`
+  query getData {
+    allMovies {
+      id
+      title
+    }
+  }
+`;
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+const { loading, error, data } = useQuery(ALL_DATA);
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+https://www.apollographql.com/docs/react/data/queries#executing-a-query
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+useQuery API  
+https://www.apollographql.com/docs/react/data/queries/#usequery-api
