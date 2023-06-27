@@ -125,3 +125,48 @@ Apollo Client 개발자 도구는 오픈 소스 GraphQL 클라이언트인 Apoll
 
 https://github.com/apollographql/apollo-client-devtools
 https://www.apollographql.com/docs/react/caching/overview/#visualizing-the-cache
+
+**Local-only fields in Apollo Client**
+
+Apollo 클라이언트 쿼리에는 GraphQL 서버의 스키마에 정의되지 않은 로컬 전용 필드가 포함될 수 있습니다. @client 지시문은 isLiked가 로컬 전용 필드임을 Apollo Client에 알립니다.  
+isLiked는 로컬 전용이므로 Apollo Client는 데이터를 가져오기 위해 서버에 보내는 쿼리에서 이를 생략합니다. 최종 쿼리 결과는 모든 로컬 및 원격 필드가 채워진 후에 반환됩니다.
+
+```
+query getMovie($movieId: ID!) {
+	movie(id: $movieId) {
+		id
+		title
+		rating
+		description_full
+		medium_cover_image
+		isLiked @client
+	}
+}
+```
+
+https://www.apollographql.com/docs/react/local-state/managing-state-with-field-policies/
+
+**writeFragment**
+
+readFragment를 사용하여 Apollo 클라이언트 캐시에서 "random-access" 데이터를 읽는 것 외에도 writeFragment 메서드를 사용하여 캐시에 데이터를 쓸 수 있습니다.  
+writeFragment를 사용하여 캐시된 데이터에 대한 변경 사항은 GraphQL 서버에 푸시되지 않습니다. 환경을 다시 로드하면 이러한 변경 사항이 사라집니다.
+캐시 안에서 우리가 수정하고 싶은 객체(type) 접근(fragment부)하여 변경(data부)한다.
+
+```
+// 캐시 안에서 우리가 수정하고 싶은 객체(type) 접근(fragment부)하여 변경(data부)한다.
+client.writeFragment({
+	id: `Movie:${id}`,
+	fragment: gql`
+	fragment MyMovieFragment on Movie {
+		rating
+		isLiked
+	}
+	`,
+	data: {
+	// rating: 10, // remote available
+	isLiked: !data.movie.isLiked, // local is also available
+	},
+});
+```
+
+https://www.apollographql.com/docs/react/caching/cache-interaction/#writefragment

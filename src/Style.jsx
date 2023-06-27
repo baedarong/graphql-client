@@ -90,3 +90,15 @@ export const PosterBg = styled.div`
   background-position: center center;
   border-radius: 7px;
 `;
+
+export const LikeButton = styled.div`
+  background-color: yellow;
+  padding: 8px 15px;
+  margin-bottom: 10px;
+  color: gray;
+  font-size: 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  border-width: 0px;
+  width: 3rem;
+`;
