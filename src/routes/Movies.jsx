@@ -1,24 +1,18 @@
 import { gql, useQuery } from "@apollo/client";
 import React from "react";
+import { Link } from "react-router-dom";
 
-const ALL_DATA = gql`
-  query getData {
+const ALL_MOVIES = gql`
+  query getMovies {
     allMovies {
       id
       title
-    }
-    allTweets {
-      id
-      text
-      author {
-        fullName
-      }
     }
   }
 `;
 
 export default function Movies() {
-  const { data, error, loading } = useQuery(ALL_DATA);
+  const { data, error, loading } = useQuery(ALL_MOVIES);
 
   if (loading) return <h1>loading...</h1>;
   if (error) return <h1>can not fetch data. the reason is {error} </h1>;
@@ -26,12 +20,8 @@ export default function Movies() {
     <div>
       <h1>Movie List</h1>
       {data.allMovies.map((movie) => (
-        <li key={movie.id}>{movie.title}</li>
-      ))}
-      <h1>Tweet List</h1>
-      {data.allTweets.map((tweet) => (
-        <li key={tweet.id}>
-          {tweet.text} by {tweet.author.fullName}
+        <li key={movie.id}>
+          <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
         </li>
       ))}
     </div>

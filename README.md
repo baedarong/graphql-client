@@ -1,6 +1,6 @@
 ## Apollo Client with ReactJS
 
-**Apollo Client**  
+**Introduction to Apollo Client**  
 Apollo Client는 GraphQL을 사용하여 로컬 및 원격 데이터를 모두 관리할 수 있는 JavaScript용 상태 관리 라이브러리입니다. UI를 자동으로 업데이트하면서 애플리케이션 데이터를 가져오고, 캐시하고, 수정하는 데 사용합니다.  
 https://www.apollographql.com/docs/react
 
@@ -13,7 +13,7 @@ https://www.apollographql.com/docs/react
 
 https://www.apollographql.com/docs/react/#features
 
-**GraphQL Server Connect**
+**Localhost GraphQL 서버 실행**
 
 ApolloClient 초기화
 
@@ -21,7 +21,7 @@ ApolloClient 초기화
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 // apllo client 생성 및 백엔드와 연동
-// 실행중인 graphQL server를 가지고 있어야함.
+// 실행되고 있는 graphQL server 를 갖고 있는게 중요함.
 const client = new ApolloClient({
 	uri: "http://localhost:4000",
 	cache: new InMemoryCache(),
@@ -66,23 +66,62 @@ function Component() {
 
 https://www.apollographql.com/docs/react/api/react/hooks/#useapolloclient
 
-**useQuery**
-useQuery 훅을 사용하여 React에서 GraphQL 데이터를 가져오고 그 결과를 UI에 연결할 수 있습니다. useQuery 훅은 Apollo 애플리케이션에서 쿼리를 실행하기 위한 기본 API입니다. 컴포넌트가 렌더링될 때 useQuery는 UI를 렌더링하는 데 사용할 수 있는 loading, error, data 속성이 포함된 Apollo Client의 객체를 반환합니다.
+**useQuery & Variables**
+useQuery 훅을 사용하여 React에서 GraphQL 데이터를 가져오고 그 결과를 UI에 연결할 수 있습니다. useQuery 훅은 Apollo 애플리케이션에서 쿼리를 실행하기 위한 기본 API입니다. 컴포넌트가 렌더링될 때 useQuery는 UI를 렌더링하는 데 사용할 수 있는 loading, error, data 속성이 포함된 Apollo Client의 객체를 반환합니다.
 
 ```
-const ALL_DATA = gql`
-  query getData {
-    allMovies {
-      id
-      title
-    }
-  }
-`;
-
-const { loading, error, data } = useQuery(ALL_DATA);
+ex) const { loading, error, data } = useQuery(GET_DOGS);
 ```
 
 https://www.apollographql.com/docs/react/data/queries#executing-a-query
 
 useQuery API  
 https://www.apollographql.com/docs/react/data/queries/#usequery-api
+
+**Apollo Cache - Fetch**
+Apollo Client 설정에서 `cache: new InMemoryCache()` 설정으로 인해 쿼리 결과가 브라우저의 메모리에 있는 캐시에 저장되기 때문에, 맨 처음 화면을 가져올 때만 data fetching이 작동하고 다른 화면으로 이동했다가 다시 돌아왔을 때 데이터를 다시 가져오지 않는다.
+실시간 백엔드 데이터를 요청하고 싶을 때는 `fetchPolicy:'cache-and-network'`를 useQuery 객체에 포함시키면 된다.
+
+```
+const result = useQuery(SOMETHING, {
+	fetchPolicy:'cache-and-network'
+})
+```
+
+https://www.apollographql.com/docs/react/data/queries/#supported-fetch-policies
+
+**Apollo Cache - Data normalization**
+캐시는 객체가 포함된 각 필드를 가져와 해당 값을 적절한 객체에 대한 참조로 바꿉니다.
+들어오는 오브젝트가 기존 캐시된 오브젝트와 동일한 캐시 ID를 가질 때마다 해당 오브젝트의 필드가 병합됩니다. 해당 캐시 ID는 Apollo가 자동 처리 합니다.
+
+```
+ex) profile->profile/detail 이동 시
+같은 ID에 homeworld 객체만 더 추가된다면 cache에서 homeworld 객체만 병합된다.
+
+{
+	 "__typename": "Person",
+	 "id": "cGVvcGxlOjE=",
+	 "name": "Luke Skywalker",
+	 "homeworld": {
+		 "__typename": "Planet",
+		 "id": "cGxhbmV0czox",
+		 "name": "Tatooine"
+	 }
+ }
+```
+
+https://www.apollographql.com/docs/react/caching/overview/#data-normalization
+
+**Apollo Client Devtools**
+
+Apollo Client를 위한 GraphQL 디버깅 도구.
+Apollo Client 개발자 도구는 오픈 소스 GraphQL 클라이언트인 Apollo Client를 위한 Chrome 확장 프로그램입니다.
+이 확장 프로그램에는 4가지 주요 기능이 있습니다:
+
+1. 앱의 네트워크 인터페이스를 직접 사용하여 GraphQL 서버에 대해 쿼리할 수 있는 Apollo Studio Explorer의 기본 제공 버전입니다(구성할 필요 없음).
+2. 현재 페이지에서 감시 중인 쿼리, 해당 쿼리가 로드되는 시기 및 해당 쿼리가 사용하는 변수를 표시하는 쿼리 감시기.
+3. 아폴로 클라이언트 애플리케이션 데이터에 적용된 변경 사항을 표시하는 변경 검사기.
+4. Apollo 클라이언트 캐시 데이터를 표시하는 캐시 검사기. 트리형 인터페이스를 통해 캐시를 탐색하고 특정 필드 키 및 값을 검색할 수 있습니다.
+
+https://github.com/apollographql/apollo-client-devtools
+https://www.apollographql.com/docs/react/caching/overview/#visualizing-the-cache
